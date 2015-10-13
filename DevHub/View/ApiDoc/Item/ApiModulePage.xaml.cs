@@ -1,35 +1,46 @@
-﻿using DevHub.Model.Contact;
+﻿using DevHub.Model.ApiDoc.Item;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
-namespace DevHub.Pages.ApiDoc
+// “空白页”项模板在 http://go.microsoft.com/fwlink/?LinkId=234238 上提供
+
+namespace DevHub.View.ApiDoc.Item
 {
-    //TODO: Consider load the details asyncronisly. Try to load the data in a Distpacher.
-    //TODO: Consider PLM
-
-    public sealed partial class ApiCollectionModule : Page
+    /// <summary>
+    /// 可用于自身或导航至 Frame 内部的空白页。
+    /// </summary>
+    public sealed partial class ApiModulePage : Page
     {
-        private Contact selectedContact;
+        private ApiItem apiItem;
 
-        private ObservableCollection<Contact> Contacts;
+        private ObservableCollection<ApiModule> apiModules;
 
-        public ApiCollectionModule()
+        public ApiModulePage()
         {
             this.InitializeComponent();
             this.Loaded += OnLoaded;
 
-            // Get the contacts from a Service
+            // Get the apiModules from a Service
             // Remember to enable the NavigationCacheMode of this Page to avoid
             // load the data every time user navigates back and forward.    
-            Contacts = Contact.GetContacts(5);
-            if (Contacts.Count > 0)
+            apiModules = new ApiModule().getApiModule(20);
+            if (apiModules.Count > 0)
             {
-                MasterListView.ItemsSource = Contacts;
+                ApiModuleCVS.Source = apiModules;
             }
         }
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -43,9 +54,9 @@ namespace DevHub.Pages.ApiDoc
         }
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            if (selectedContact == null && Contacts.Count > 0)
+            if (apiItem == null && apiModules.Count > 0)
             {
-                selectedContact = Contacts[0];
+                apiItem = apiModules[0].ApiItems[0];
                 MasterListView.SelectedIndex = 0;
             }
             // If the app starts in narrow mode - showing only the Master listView - 
@@ -60,7 +71,7 @@ namespace DevHub.Pages.ApiDoc
                 // so it is necessary to set the commands and the selection mode.
                 VisualStateManager.GoToState(this, MasterDetailsState.Name, true);
                 MasterListView.SelectionMode = ListViewSelectionMode.Extended;
-                MasterListView.SelectedItem = selectedContact;
+                MasterListView.SelectedItem = apiItem;
             }
             else
             {
@@ -72,20 +83,17 @@ namespace DevHub.Pages.ApiDoc
             bool isNarrow = e.NewState == NarrowState;
             if (isNarrow)
             {
-                Frame.Navigate(typeof(ApiDetails), selectedContact, new SuppressNavigationTransitionInfo());
+                Frame.Navigate(typeof(ApiDetails), apiItem, new SuppressNavigationTransitionInfo());
             }
             else
             {
                 VisualStateManager.GoToState(this, MasterDetailsState.Name, true);
                 MasterListView.SelectionMode = ListViewSelectionMode.Extended;
-                MasterListView.SelectedItem = selectedContact;
+                MasterListView.SelectedItem = apiItem;
             }
 
             EntranceNavigationTransitionInfo.SetIsTargetElement(MasterListView, isNarrow);
-            if (DetailContentPresenter != null)
-            {
-                EntranceNavigationTransitionInfo.SetIsTargetElement(DetailContentPresenter, !isNarrow);
-            }
+           
         }
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -93,8 +101,8 @@ namespace DevHub.Pages.ApiDoc
             {
                 if (MasterListView.SelectedItems.Count == 1)
                 {
-                    selectedContact = MasterListView.SelectedItem as Contact;
-                    EnableContentTransitions();
+                    apiItem = MasterListView.SelectedItem as ApiItem;
+                    this.frame.Navigate(typeof(ApiItemDetailsPage), apiItem, new DrillInNavigationTransitionInfo());
                 }
                 // Entering in Extended selection
                 else if (MasterListView.SelectedItems.Count > 1
@@ -115,54 +123,51 @@ namespace DevHub.Pages.ApiDoc
         private void OnItemClick(object sender, ItemClickEventArgs e)
         {
             // The clicked item it is the new selected contact
-            selectedContact = e.ClickedItem as Contact;
+            apiItem = e.ClickedItem as ApiItem;
             if (PageSizeStatesGroup.CurrentState == NarrowState)
             {
                 // Go to the details page and display the item 
-                Frame.Navigate(typeof(ApiDetails), selectedContact, new DrillInNavigationTransitionInfo());
+                Frame.Navigate(typeof(ApiItemDetailsPage), apiItem, new DrillInNavigationTransitionInfo());
             }
-            //else
+            else
             {
+
                 // Play a refresh animation when the user switches detail items.
                 //EnableContentTransitions();
             }
         }
-        private void EnableContentTransitions()
-        {
-            DetailContentPresenter.ContentTransitions.Clear();
-            DetailContentPresenter.ContentTransitions.Add(new EntranceThemeTransition());
-        }
+
         #region Commands
         private void AddItem(object sender, RoutedEventArgs e)
         {
-            Contact c = Contact.GetNewContact();
-            Contacts.Add(c);
+            //Contact c = Contact.GetNewContact();
+            //apiModules.Add(c);
 
-            // Select this item in case that the list is empty
-            if (MasterListView.SelectedIndex == -1)
-            {
-                MasterListView.SelectedIndex = 0;
-                selectedContact = MasterListView.SelectedItem as Contact;
-                // Details view is collapsed, in case there is not items.
-                // You should show it just in case. 
-                DetailContentPresenter.Visibility = Visibility.Visible;
-            }
+            //// Select this item in case that the list is empty
+            //if (MasterListView.SelectedIndex == -1)
+            //{
+            //    MasterListView.SelectedIndex = 0;
+            //    apiItem = MasterListView.SelectedItem as Contact;
+            //    // Details view is collapsed, in case there is not items.
+            //    // You should show it just in case. 
+            //    DetailContentPresenter.Visibility = Visibility.Visible;
+            //}
         }
         private void DeleteItem(object sender, RoutedEventArgs e)
         {
-            if (selectedContact != null)
+            if (apiItem != null)
             {
-                Contacts.Remove(selectedContact);
+                
+                //apiModules.Remove(ApiItem);
 
                 if (MasterListView.Items.Count > 0)
                 {
                     MasterListView.SelectedIndex = 0;
-                    selectedContact = MasterListView.SelectedItem as Contact;
+                    apiItem = MasterListView.SelectedItem as ApiItem;
                 }
                 else
                 {
                     // Details view is collapsed, in case there is not items.
-                    DetailContentPresenter.Visibility = Visibility.Collapsed;
                 }
             }
         }
@@ -170,23 +175,22 @@ namespace DevHub.Pages.ApiDoc
         {
             if (MasterListView.SelectedIndex != -1)
             {
-                List<Contact> selectedItems = new List<Contact>();
-                foreach (Contact contact in MasterListView.SelectedItems)
+                List<ApiModule> selectedItems = new List<ApiModule>();
+                foreach (ApiModule contact in MasterListView.SelectedItems)
                 {
                     selectedItems.Add(contact);
                 }
-                foreach (Contact contact in selectedItems)
+                foreach (ApiModule contact in selectedItems)
                 {
-                    Contacts.Remove(contact);
+                    apiModules.Remove(contact);
                 }
                 if (MasterListView.Items.Count > 0)
                 {
                     MasterListView.SelectedIndex = 0;
-                    selectedContact = MasterListView.SelectedItem as Contact;
+                    apiItem = MasterListView.SelectedItem as ApiItem;
                 }
                 else
                 {
-                    DetailContentPresenter.Visibility = Visibility.Collapsed;
                 }
             }
         }
@@ -209,7 +213,7 @@ namespace DevHub.Pages.ApiDoc
             }
         }
         private void ShowSliptView(object sender, RoutedEventArgs e)
-        { 
+        {
             // Clearing the cache
             int cacheSize = ((Frame)Parent).CacheSize;
             ((Frame)Parent).CacheSize = 0;

@@ -5,7 +5,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
-namespace DevHub.Pages.ApiDoc
+namespace DevHub.View.ApiDoc
 {
     public sealed partial class ApiDetails : Page
     {
