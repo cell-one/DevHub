@@ -11,7 +11,6 @@
         <SplitView.Pane>
             <StackPanel Margin="12">
                 <Button Content="Master Detail and Selection" 
-                        Click="NavigateToMasterDetailSelection"
                         Style="{StaticResource HomeButtonStyle}" 
                         HorizontalAlignment="Stretch" 
                         HorizontalContentAlignment="Left" />

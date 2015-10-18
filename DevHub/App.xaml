@@ -67,6 +67,13 @@
                 <Setter Property="Template" Value="{StaticResource SplitViewTogglePaneButtonTemplate}" />
             </Style>
 
+            <Style x:Key="SearchaneButtonStyle" TargetType="Button" BasedOn="{StaticResource SplitViewTogglePaneButtonStyle}">
+                <Setter Property="FontFamily" Value="{ThemeResource SymbolThemeFontFamily}" />
+                <Setter Property="Content" Value="&#xE700;" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="Width" Value="32" />
+            </Style>
+
             <Style x:Key="HomeButtonStyle" TargetType="Button">
                 <Setter Property="Template">
                     <Setter.Value>

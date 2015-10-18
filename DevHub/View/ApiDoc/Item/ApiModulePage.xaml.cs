@@ -1,4 +1,5 @@
 ﻿using DevHub.Model.ApiDoc.Item;
+using DevHub.View.ApiDoc.Repository;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -222,5 +223,10 @@ namespace DevHub.View.ApiDoc.Item
             MySamplesPane.SamplesSplitView.IsPaneOpen = !MySamplesPane.SamplesSplitView.IsPaneOpen;
         }
         #endregion
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(RepositoryPage) , new DrillInNavigationTransitionInfo());
+        }
     }
 }
